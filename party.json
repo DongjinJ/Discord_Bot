@@ -1,0 +1,23 @@
+{
+    "Update":"True",
+    "First": {
+        "list": "공느랑 소서 / 병욱 디트 / 진욱 블레 / 준형 바드",
+        "Clear": "True"
+    },
+    "Second": {
+        "list": "병욱 리퍼 / 공느랑 창술 / 준형 배마 / 동진 홀나",
+        "Clear": "True"
+    },
+    "Third": {
+        "list": "진욱 워로드 / 동진 블레 / 공느랑 배마 / 병욱 바드",
+        "Clear": "False"
+    },
+    "Forth": {
+        "list": "준형 데모닉 / 동진 알카 / 공느랑 블레 / 병욱 바드",
+        "Clear": "False"
+    },
+    "Fifth": {
+        "list": "동진 섬너 / 준형 창술 / / 이쁜이 홀나",
+        "Clear": "False"
+    }
+}
