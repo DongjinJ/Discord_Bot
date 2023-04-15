@@ -8,13 +8,23 @@ const schedule = require('node-schedule');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+require("dotenv").config();
+
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey:process.env.OPENAI_API_KEY,
+});
+
+const openai = new OpenAIApi(configuration);
+
 const testMode = true;
 var serviceChannelID = '';
 if(testMode === true){
-    serviceChannelID = '953204467900227597';
+    serviceChannelID = process.env.TEST_SERVER_ID;
 }
 else{
-    serviceChannelID = '861150795897372696';
+    serviceChannelID = process.env.CLIENT_SERVER_ID;
 }
 
 
@@ -64,6 +74,36 @@ client.on('messageCreate', async(msg) => {
                 const best_4 = Math.ceil(gold * 0.95 * 3 / 4 / 1.1);
                 const best_8 = Math.ceil(gold * 0.95 * 7 / 8 / 1.1);
                 msg.reply('4인: ' + best_4.toString() + ' / 8인: ' + best_8.toString())
+            }
+            else if(str.indexOf('!쿠크') != -1){
+                var split_str = str.substring(str.indexOf(' '));
+                const request = split_str;
+                const runPrompt = async(str) => {
+                    var answer = "No Data"
+                    // const response = await openai.createCompletion({
+                    //     model:"text-davinci-003",
+                    //     prompt:str,
+                    //     max_tokens:300,
+                    //     temperature:0.2,
+                    // }).then(function(result){
+                    //     answer = result.data.choices[0].text;
+                    //     console.log(str);
+                    //     console.log(">> ", answer);
+                    //     msg.reply(answer);
+                    // });
+                    const response = await openai.createChatCompletion({
+                        model: "gpt-3.5-turbo",
+                        messages: [{ role: "user", content: str }],
+                    }).then(function(result){
+                        answer = result.data.choices[0].message.content;
+                        console.log(str);
+                        console.log(">> ", answer);
+                        msg.reply(answer);
+                    });
+                    // console.log(response.data.choices[0].message.content);
+                }
+                runPrompt(request);
+                
             }
             else if(str.indexOf('!전투정보') != -1){
                 console.log(`[${msg.author.username}] Command: ${str}`)
@@ -292,8 +332,8 @@ client.on('messageCreate', async(msg) => {
                 // console.log(`원정대 Lv.${expeditionLevel} / 아이템 Lv.${itemLevel}`);
             }
             else{
-                // msg.reply('[Error]: 명령어 오류')
-                // msg.reply('[Command Format] !쌀 (금액)')
+                msg.reply('[Error]: 명령어 오류')
+                msg.reply('[Command Format] !쌀 (금액)')
             }
         }
         /*              Not Service Channel                 */
@@ -437,4 +477,4 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.login(config.token);
+client.login(process.env.DISCORD_TOKEN);
