@@ -331,9 +331,12 @@ client.on('messageCreate', async(msg) => {
                 // const itemLevel = $("level-info__item").text();
                 // console.log(`원정대 Lv.${expeditionLevel} / 아이템 Lv.${itemLevel}`);
             }
-            else{
+            else if(str.indexOf('!') != -1){
                 msg.reply('[Error]: 명령어 오류')
-                msg.reply('[Command Format] !쌀 (금액)')
+                msg.reply('[Command Format] !쌀 (금액) / !쿠크 (질문) / !전투정보 (아이디)')
+            }
+            else{
+                // Do Nothing
             }
         }
         /*              Not Service Channel                 */
