@@ -76,33 +76,7 @@ client.on('messageCreate', async(msg) => {
                 msg.reply('4인: ' + best_4.toString() + ' / 8인: ' + best_8.toString())
             }
             else if(str.indexOf('!쿠크') != -1){
-                var split_str = str.substring(str.indexOf(' '));
-                const request = split_str;
-                const runPrompt = async(str) => {
-                    var answer = "No Data"
-                    // const response = await openai.createCompletion({
-                    //     model:"text-davinci-003",
-                    //     prompt:str,
-                    //     max_tokens:300,
-                    //     temperature:0.2,
-                    // }).then(function(result){
-                    //     answer = result.data.choices[0].text;
-                    //     console.log(str);
-                    //     console.log(">> ", answer);
-                    //     msg.reply(answer);
-                    // });
-                    const response = await openai.createChatCompletion({
-                        model: "gpt-3.5-turbo",
-                        messages: [{ role: "user", content: str }],
-                    }).then(function(result){
-                        answer = result.data.choices[0].message.content;
-                        console.log(str);
-                        console.log(">> ", answer);
-                        msg.reply(answer);
-                    });
-                    // console.log(response.data.choices[0].message.content);
-                }
-                runPrompt(request);
+                
                 
             }
             else if(str.indexOf('!전투정보') != -1){
