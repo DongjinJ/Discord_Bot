@@ -11,6 +11,7 @@ const cheerio = require('cheerio');
 require("dotenv").config();
 
 const { Configuration, OpenAIApi } = require("openai");
+const { spawn } = require('child_process');
 
 const configuration = new Configuration({
   apiKey:process.env.OPENAI_API_KEY,
@@ -75,7 +76,21 @@ client.on('messageCreate', async(msg) => {
                 const best_8 = Math.ceil(gold * 0.95 * 7 / 8 / 1.1);
                 msg.reply('4인: ' + best_4.toString() + ' / 8인: ' + best_8.toString())
             }
-            else if(str.indexOf('!쿠크') != -1){
+            else if(str.indexOf('!고고학') != -1){
+                var split_str = str.split(' ');
+                if(split_str.length == 4){
+                    const divideTool = spawn('python', ['Divide.py', split_str[1], split_str[2], split_str[3]]);
+                    divideTool.stdout.on('data', function(data) {
+                        msg.reply(data.toString());
+                    });
+                    divideTool.stderr.on('data', function(data) {
+                        msg.reply(data.toString());
+                    });
+                }
+                else{
+                    msg.reply('[Error]: 명령어 오류')
+                    msg.reply('[Command Format] !고고학 (오래하 유물) (희귀 유물) (고대 유물)')
+                }
                 
                 
             }
