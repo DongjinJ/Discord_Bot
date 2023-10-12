@@ -21,7 +21,7 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-const testMode = true;
+const testMode = false;
 var serviceChannelID = '';
 if(testMode === true){
     serviceChannelID = process.env.TEST_SERVER_ID;
