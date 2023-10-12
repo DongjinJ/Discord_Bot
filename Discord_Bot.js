@@ -12,6 +12,8 @@ require("dotenv").config();
 
 const { Configuration, OpenAIApi } = require("openai");
 const { spawn } = require('child_process');
+var Iconv  = require('iconv').Iconv;
+var iconv = Iconv('EUC-KR', 'UTF-8')
 
 const configuration = new Configuration({
   apiKey:process.env.OPENAI_API_KEY,
@@ -68,6 +70,7 @@ client.on('messageCreate', async(msg) => {
         /*              Main Server                 */
         if(msg.channelId === serviceChannelID){
             var str = msg.content;
+            console.log(str);
             if(str.indexOf('!쌀') != -1){
                 console.log(`[${msg.author.username}] Command: ${str}`)
                 var split_str = str.split(' ');
@@ -80,11 +83,54 @@ client.on('messageCreate', async(msg) => {
                 var split_str = str.split(' ');
                 if(split_str.length == 4){
                     const divideTool = spawn('python', ['Divide.py', split_str[1], split_str[2], split_str[3]]);
-                    divideTool.stdout.on('data', function(data) {
-                        msg.reply(data.toString());
+                        divideTool.stdout.on('data', function(data) {
+                        
+                        
+                        var encodeData = data.toString();
+                        sourceData = encodeData.split(' ');
+                        if (sourceData.length == 10){
+                            var targetH = sourceData[0];
+                            var targetM = sourceData[1];
+                            var targetL = sourceData[2];
+                            var maxMIndex = sourceData[3];
+                            var maxLIndex = sourceData[4];
+                            var maxPowder = sourceData[5];
+                            var finalH = sourceData[6];
+                            var finalM = sourceData[7];
+                            var finalL = sourceData[8];
+                            var cost = sourceData[9];
+                            cost = cost.replace('\n', '');
+                            cost = cost.replace('\r', '');
+                            var answerData = '';
+                            answerData += '- 입력 유물 재료' + '\n';
+                            answerData += `  오래하 유물: ${split_str[1]} / 희귀한 유물: ${split_str[2]} / 고대 유물: ${split_str[3]}` + '\n';
+                            answerData += `- 남은 유물 재료` + '\n';
+                            answerData += `  오래하 유물: ${targetH} / 희귀한 유물: ${targetM} / 고대 유물: ${targetL}` + '\n\n';
+                            answerData += `* 희귀한 유물 -> 고고학 가루: ${maxMIndex}개 (${maxMIndex * 50})` + '\n';
+                            answerData += `* 고대 유물 -> 고고학 가루: ${maxLIndex}개 (${maxLIndex * 100})` + '\n';
+                            answerData += `* 고고학 가루 -> 오래하 유물: ${maxPowder}개 (${maxPowder / 10})` + '\n\n';
+                            answerData += `- 변환 후 유물 재료` + '\n';
+                            answerData += `  오래하 유물: ${finalH} / 희귀한 유물: ${finalM} / 고대 유물: ${finalL}` + '\n';
+                            answerData += `  현재 만들 수 있는 최상급 상래하: ${cost}개` + '\n';
+                            msg.reply(answerData);
+                            // msg.reply('입력 유물 재료');
+                            // msg.reply(`오래하 유물: ${split_str[1]} / 희귀한 유물: ${split_str[2]} / 고대 유물: ${split_str[3]}`);
+                            // msg.reply(`남은 유물 재료`);
+                            // msg.reply(`오래하 유물: ${targetH} / 희귀한 유물: ${targetM} / 고대 유물: ${targetL}`);
+                            // msg.reply(`희귀한 유물 -> 고고학 가루: ${maxMIndex}개 (${maxMIndex * 50})`);
+                            // msg.reply(`고대 유물 -> 고고학 가루: ${maxLIndex}개 (${maxLIndex * 100})`);
+                            // msg.reply(`고고학 가루 -> 오래하 유물: ${maxPowder}개 (${maxPowder / 10})`);
+                            // msg.reply(`변환 후 유물 재료`);
+                            // msg.reply(`오래하 유물: ${finalH} / 희귀한 유물: ${finalM} / 고대 유물: ${finalL}`);
+                            // msg.reply(`현재 만들 수 있는 최상급 상래하: ${cost}개`);
+                        }
+                        
                     });
                     divideTool.stderr.on('data', function(data) {
-                        msg.reply(data.toString());
+
+                        encodeData = iconv.convert(data);
+                        console.log(encodeData);
+                        msg.reply(encodeData);
                     });
                 }
                 else{
