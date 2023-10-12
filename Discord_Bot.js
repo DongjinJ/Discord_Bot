@@ -124,6 +124,9 @@ client.on('messageCreate', async(msg) => {
                             // msg.reply(`오래하 유물: ${finalH} / 희귀한 유물: ${finalM} / 고대 유물: ${finalL}`);
                             // msg.reply(`현재 만들 수 있는 최상급 상래하: ${cost}개`);
                         }
+                        else{
+                            msg.reply('[Error]: 계산 오류. 다시 시도해주세요.')
+                        }
                         
                     });
                     divideTool.stderr.on('data', function(data) {
