@@ -81,8 +81,8 @@ client.on('messageCreate', async(msg) => {
             }
             else if(str.indexOf('!고고학') != -1){
                 var split_str = str.split(' ');
-                if(split_str.length == 4){
-                    const divideTool = spawn('python', ['Divide.py', split_str[1], split_str[2], split_str[3]]);
+                if(split_str.length == 5){
+                    const divideTool = spawn('python', ['Divide.py', split_str[1], split_str[2], split_str[3], split_str[4]]);
                         divideTool.stdout.on('data', function(data) {
                         
                         

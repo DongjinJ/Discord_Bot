@@ -3,7 +3,7 @@ import sys, math
 RARE_RELIC = 52
 ADVANCED_RELIC = 51
 NORMAL_RELIC = 107
-def solve_relic(relicH, relicM, relicL):
+def solve_relic(relicH, relicM, relicL, defaultPowder):
     
     remain = min_relic(relicH, relicM, relicL)
     # print(f'입력 유물 재료')
@@ -28,7 +28,7 @@ def solve_relic(relicH, relicM, relicL):
     cost = 0
     for j in range(sizeM):
         for i in range(sizeL):
-            powder = 0
+            powder = defaultPowder
             powder += (j * 80)
             tempM = targetM - (j * 50)
             powder += (i * 80)
@@ -86,5 +86,5 @@ def min_relic(valueH, valueM, valueL):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) == 4:
-        solve_relic(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+    if len(sys.argv) == 5:
+        solve_relic(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
