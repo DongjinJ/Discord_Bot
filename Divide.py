@@ -33,7 +33,7 @@ def solve_relic(relicH, relicM, relicL, defaultPowder):
             tempM = targetM - (j * 50)
             powder += (i * 80)
             tempL = targetL - (i * 100)
-            tempH = targetH + (powder / 100) * 10
+            tempH = targetH + (powder / 10) - (powder % 100)
 
             tempCost = min_relic(tempH, tempM, tempL)
             if cost == 0:
