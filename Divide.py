@@ -33,7 +33,7 @@ def solve_relic(relicH, relicM, relicL, defaultPowder):
             tempM = targetM - (j * 50)
             powder += (i * 80)
             tempL = targetL - (i * 100)
-            tempH = targetH + (powder / 10)
+            tempH = targetH + (powder / 100) * 10
 
             tempCost = min_relic(tempH, tempM, tempL)
             if cost == 0:
@@ -61,7 +61,7 @@ def solve_relic(relicH, relicM, relicL, defaultPowder):
     # print(f'변환 후 유물 재료')
     # print(f'오래하 유물: {finalH} / 희귀한 유물: {finalM} / 고대 유물: {finalL}')
     # print(f'현재 만들 수 있는 최상급 상래하: {cost}개')
-    print(f'{targetH} {targetM} {targetL} {maxMIndex} {maxLIndex} {maxPowder} {finalH} {finalM} {finalL} {cost}')
+    print(f'{targetH} {targetM} {targetL} {maxMIndex} {maxLIndex} {maxPowder} {finalH} {finalM} {finalL} {cost+remain}')
 
 def min_relic(valueH, valueM, valueL):
     if(valueH > RARE_RELIC):
