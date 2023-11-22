@@ -108,21 +108,11 @@ client.on('messageCreate', async(msg) => {
                             answerData += `  오레하 유물: ${targetH} / 희귀한 유물: ${targetM} / 고대 유물: ${targetL}` + '\n\n';
                             answerData += `* 희귀한 유물 -> 고고학 가루: ${maxMIndex}개 (${maxMIndex * 50})` + '\n';
                             answerData += `* 고대 유물 -> 고고학 가루: ${maxLIndex}개 (${maxLIndex * 100})` + '\n';
-                            answerData += `* 고고학 가루 -> 오레하 유물: ${maxPowder}개 (${maxPowder / 10})` + '\n\n';
+                            answerData += `* 고고학 가루 -> 오레하 유물: ${maxPowder}개 (${(maxPowder / 10) - (maxPowder % 10)})` + '\n\n';
                             answerData += `- 변환 후 유물 재료` + '\n';
                             answerData += `  오레하 유물: ${finalH} / 희귀한 유물: ${finalM} / 고대 유물: ${finalL}` + '\n';
                             answerData += `  현재 만들 수 있는 최상급 오레하: ${cost}개` + '\n';
                             msg.reply(answerData);
-                            // msg.reply('입력 유물 재료');
-                            // msg.reply(`오래하 유물: ${split_str[1]} / 희귀한 유물: ${split_str[2]} / 고대 유물: ${split_str[3]}`);
-                            // msg.reply(`남은 유물 재료`);
-                            // msg.reply(`오래하 유물: ${targetH} / 희귀한 유물: ${targetM} / 고대 유물: ${targetL}`);
-                            // msg.reply(`희귀한 유물 -> 고고학 가루: ${maxMIndex}개 (${maxMIndex * 50})`);
-                            // msg.reply(`고대 유물 -> 고고학 가루: ${maxLIndex}개 (${maxLIndex * 100})`);
-                            // msg.reply(`고고학 가루 -> 오래하 유물: ${maxPowder}개 (${maxPowder / 10})`);
-                            // msg.reply(`변환 후 유물 재료`);
-                            // msg.reply(`오래하 유물: ${finalH} / 희귀한 유물: ${finalM} / 고대 유물: ${finalL}`);
-                            // msg.reply(`현재 만들 수 있는 최상급 상래하: ${cost}개`);
                         }
                         else{
                             msg.reply('[Error]: 계산 오류. 다시 시도해주세요.')
@@ -138,7 +128,7 @@ client.on('messageCreate', async(msg) => {
                 }
                 else{
                     msg.reply('[Error]: 명령어 오류')
-                    msg.reply('[Command Format] !고고학 (오래하 유물) (희귀 유물) (고대 유물)')
+                    msg.reply('[Command Format] !고고학 (오래하 유물) (희귀 유물) (고대 유물) (고고학 가루)')
                 }
                 
                 
@@ -369,7 +359,7 @@ client.on('messageCreate', async(msg) => {
                 // const itemLevel = $("level-info__item").text();
                 // console.log(`원정대 Lv.${expeditionLevel} / 아이템 Lv.${itemLevel}`);
             }
-            else if(str.indexOf('!') != -1){
+            else if(str[0] == "!"){
                 msg.reply('[Error]: 명령어 오류')
                 msg.reply('[Command Format] !쌀 (금액) / !쿠크 (질문) / !전투정보 (아이디)')
             }
