@@ -8,20 +8,20 @@ const schedule = require('node-schedule');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+// import { getPrice } from './OpenApi';
+const lostarkApi = require('./OpenApi.js')
+const ancientRelicsId = 6882701;
+const rareRelicsId = 6882704;
+const orehaRelicsId = 6885708;
+const targetStoneId = 6861011;
+
 require("dotenv").config();
 
-const { Configuration, OpenAIApi } = require("openai");
 const { spawn } = require('child_process');
 var Iconv  = require('iconv').Iconv;
 var iconv = Iconv('EUC-KR', 'UTF-8')
 
-const configuration = new Configuration({
-  apiKey:process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
-
-const testMode = false;
+const testMode = true;
 var serviceChannelID = '';
 if(testMode === true){
     serviceChannelID = process.env.TEST_SERVER_ID;
@@ -112,6 +112,32 @@ client.on('messageCreate', async(msg) => {
                             answerData += `- 변환 후 유물 재료` + '\n';
                             answerData += `  오레하 유물: ${finalH} / 희귀한 유물: ${finalM} / 고대 유물: ${finalL}` + '\n';
                             answerData += `  현재 만들 수 있는 최상급 오레하: ${cost}개` + '\n';
+
+                            lostarkApi.getPrice(ancientRelicsId).then((itemValue) => {
+                                ancientRelicsData = itemValue;
+                            });
+                            lostarkApi.getPrice(rareRelicsId).then((itemValue) => {
+                                rareRelicsData = itemValue;
+                            });
+                            lostarkApi.getPrice(orehaRelicsId).then((itemValue) => {
+                                orehaRelicsData = itemValue;
+                            });
+                            lostarkApi.getPrice(targetStoneId).then((itemValue) => {
+                                targetStoneData = itemValue;
+                            });
+
+                            while(true){
+                                if ((ancientRelicsData != null) && (rareRelicsData != null) && (orehaRelicsData != null) && (targetStoneData != null)){
+                                    totalAncient = (split_str[3] / ancientRelicsData.Bundle) * ancientRelicsData.Price;
+                                    totalRare = (split_str[2] / rareRelicsData.Bundle) * rareRelicsData.Price;
+                                    totalOreha = (split_str[1] / orehaRelicsData.Bundle) * orehaRelicsData.Price;
+                                    beforeCost = totalAncient + totalRare + totalOreha;
+                                    totalTarget = (cost * 15) * ancientRelicsData.Price;
+                                    answerData += `  ${totalAncient} + ${totalRare} + ${totalOreha} = ${beforeCost} / ${totalTarget} \n`;
+                                    break;
+                                }
+                            }
+
                             msg.reply(answerData);
                         }
                         else{
