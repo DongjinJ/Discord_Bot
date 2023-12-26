@@ -7,19 +7,20 @@ const fs = require('fs')
 const schedule = require('node-schedule');
 const axios = require('axios');
 const cheerio = require('cheerio');
-
+const fetch = require('fetch');
 require("dotenv").config();
 
-const { Configuration, OpenAIApi } = require("openai");
 const { spawn } = require('child_process');
 var Iconv  = require('iconv').Iconv;
 var iconv = Iconv('EUC-KR', 'UTF-8')
 
-const configuration = new Configuration({
-  apiKey:process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
+// import { getPrice } from './OpenApi.js';
+// const lostarkApi = require('./OpenApi.js')
+const LostArk_Api = process.env.LOSTARK_API_KEY;
+const ancientRelicsId = 6882701;
+const rareRelicsId = 6882704;
+const orehaRelicsId = 6885708;
+const targetStoneId = 6861011;
 
 const testMode = false;
 var serviceChannelID = '';
@@ -30,6 +31,62 @@ else{
     serviceChannelID = process.env.CLIENT_SERVER_ID;
 }
 
+async function getData(url="", itemID="", token="",data = {}) {
+    // console.log(url)
+    // console.log(itemID)
+    // console.log(token)
+    
+    const response = await axios.get(url+itemID, {
+        headers: {
+            "accpet": "application/json",
+            "authorization": "bearer " + token,
+        }
+    })
+    // console.log(response);
+    return response.data;
+};
+
+async function getPrice(itemID, token, data={}) {
+    // console.log('Get Price')
+    await getData("https://developer-lostark.game.onstove.com/markets/items/", itemID, token).then((data) => {
+        // console.log(data[0].Stats);
+        itemName = data[0].Name;
+        
+        var today = new Date();
+    
+        var year = today.getFullYear();
+        var month = ('0' + (today.getMonth() + 1)).slice(-2);
+        var day = ('0' + today.getDate()).slice(-2);
+    
+        var dayString = year + '-' + month + '-' + day;
+    
+        for(i = 0; i < data[0].Stats.length;i++){
+            if(data[0].Stats[i].Date == dayString){
+                // console.log(data[0].Stats[i].Date);
+                // console.log(data[0].Stats[i].AvgPrice);
+                itemPrice = data[0].Stats[i].AvgPrice;
+            }
+            
+        }
+        itemBundle = data[0].BundleCount;
+    })
+
+    let value = {Name: itemName, Price: itemPrice, Bundle: itemBundle};
+    return value;
+    
+}
+
+async function postData(url="", data = {}) {
+    const response = await fetch(url+data, {
+        method: "POST",
+        headers: {
+            "accpet": "application/json",
+            "authorization": "bearer " + LostArk_Api,
+        }
+    })
+
+    return response.json();
+};
 
 var updateData = schedule.scheduleJob('0 6 ? * 3', function(){
     const dataBuffer = fs.readFileSync('party.json')
@@ -104,15 +161,50 @@ client.on('messageCreate', async(msg) => {
                             var answerData = '';
                             answerData += '- 입력 유물 재료' + '\n';
                             answerData += `  오레하 유물: ${split_str[1]} / 희귀한 유물: ${split_str[2]} / 고대 유물: ${split_str[3]}` + '\n';
-                            answerData += `- 교환 유물 재료` + '\n';
-                            answerData += `  오레하 유물: ${targetH} / 희귀한 유물: ${targetM} / 고대 유물: ${targetL}` + '\n\n';
                             answerData += `* 희귀한 유물 -> 고고학 가루: ${maxMIndex}개 (${maxMIndex * 50})` + '\n';
                             answerData += `* 고대 유물 -> 고고학 가루: ${maxLIndex}개 (${maxLIndex * 100})` + '\n';
                             answerData += `* 고고학 가루 -> 오레하 유물: ${maxPowder}개 (${(maxPowder / 10) - (maxPowder % 10)})` + '\n\n';
                             answerData += `- 변환 후 유물 재료` + '\n';
                             answerData += `  오레하 유물: ${finalH} / 희귀한 유물: ${finalM} / 고대 유물: ${finalL}` + '\n';
-                            answerData += `  현재 만들 수 있는 최상급 오레하: ${cost}개` + '\n';
-                            msg.reply(answerData);
+                            answerData += `  현재 만들 수 있는 최상급 오레하: ${cost}개` + '\n\n';
+
+                            getPrice(ancientRelicsId, LostArk_Api).then((itemValue) => {
+                                ancientRelicsData = itemValue;
+                                // console.log(ancientRelicsData.Name + ' / ' + ancientRelicsData.Price)
+                                getPrice(rareRelicsId, LostArk_Api).then((itemValue) => {
+                                    rareRelicsData = itemValue;
+                                    // console.log(rareRelicsData.Name + ' / ' + rareRelicsData.Price)
+                                    getPrice(orehaRelicsId, LostArk_Api).then((itemValue) => {
+                                        orehaRelicsData = itemValue;
+                                        // console.log(orehaRelicsData.Name + ' / ' + orehaRelicsData.Price)
+                                        getPrice(targetStoneId, LostArk_Api).then((itemValue) => {
+                                            targetStoneData = itemValue;
+                                            // console.log(targetStoneData.Name + ' / ' + targetStoneData.Price)
+
+                                            totalAncient = Math.floor(split_str[3] / ancientRelicsData.Bundle) * ancientRelicsData.Price;
+                                            totalRare = Math.floor(split_str[2] / rareRelicsData.Bundle) * rareRelicsData.Price;
+                                            totalOreha = Math.floor(split_str[1] / orehaRelicsData.Bundle) * orehaRelicsData.Price;
+                                            beforeCost = totalAncient + totalRare + totalOreha;
+                                            totalTarget = ((cost * 15) * targetStoneData.Price) - (cost * 300);
+
+                                            answerData += `  < 금일 평균가 기준 >\n`;
+                                            answerData += `- 고대 유물: ${split_str[3]} / ${ancientRelicsData.Bundle} * ${ancientRelicsData.Price} = ${totalAncient}\n`;
+                                            answerData += `- 희귀한 유물: ${split_str[2]} / ${rareRelicsData.Bundle} * ${rareRelicsData.Price} = ${totalRare}\n`;
+                                            answerData += `- 오레하 유물: ${split_str[1]} / ${orehaRelicsData.Bundle} * ${orehaRelicsData.Price} = ${totalOreha}\n`;
+                                            answerData += `  순수 재료 값: ${beforeCost}\n`;
+                                            answerData += `- 최상급 오레하: (${cost} * 15 * ${targetStoneData.Price}) - (${cost} * 300) = ${totalTarget}\n`;
+
+
+                                            msg.reply(answerData);
+                                        });
+                                    });
+                                    
+                                });
+                                
+                            });
+                        
+
+                            
                         }
                         else{
                             msg.reply('[Error]: 계산 오류. 다시 시도해주세요.')
@@ -507,5 +599,6 @@ client.on('interactionCreate', async interaction => {
         fs.writeFileSync('party.json', saveJSON)
     }
 });
+
 
 client.login(process.env.DISCORD_TOKEN);
